@@ -23,6 +23,7 @@ import {
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { useLayout } from "@/context/LayoutContext";
+import { approbationsData } from "@/data/approbations";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -36,7 +37,7 @@ const MAIN_NAV = [
   { href: "/pipeline", label: "Pipeline", icon: TrendingUp },
   { href: "/produits", label: "Produits", icon: Package },
   { href: "/bobby", label: "Bobby IA", icon: Sparkles, isBobby: true },
-  { href: "/automatisations", label: "Automatisations", icon: Zap },
+  { href: "/approbations", label: "Approbations", icon: ShieldCheck, isApprobations: true },
   { href: "/rapports", label: "Rapports", icon: BarChart3 },
 ];
 
@@ -48,11 +49,14 @@ const BOTTOM_NAV = [
 export function Sidebar() {
   const pathname = usePathname();
   const { isSidebarCollapsed, toggleSidebar, isMobileMenuOpen, closeMobileMenu } = useLayout();
+  
+  const pendingCount = approbationsData.filter(a => a.status === 'pending').length;
 
-  const renderNavItem = (item: typeof MAIN_NAV[0] & { isSettings?: boolean, isBobby?: boolean }) => {
+  const renderNavItem = (item: typeof MAIN_NAV[0] & { isSettings?: boolean, isBobby?: boolean, isApprobations?: boolean }) => {
     const isActive = pathname.startsWith(item.href) || (pathname === '/' && item.href === '/dashboard');
     const isBobby = item.isBobby;
     const isSettings = item.isSettings;
+    const isApprobations = item.isApprobations;
 
     return (
       <Link
@@ -101,19 +105,34 @@ export function Sidebar() {
           )}
 
           {!isSidebarCollapsed && (
-            <motion.span
+            <motion.div
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              className="whitespace-nowrap flex-1"
+              className="flex-1 min-w-0"
             >
-              {item.label}
-            </motion.span>
+              <div className="flex flex-col">
+                <span className="whitespace-nowrap">{item.label}</span>
+                {isBobby && pendingCount > 0 && (
+                  <span className="text-[10px] text-amber-500 font-bold leading-none mt-0.5" style={{ color: '#F59E0B' }}>
+                    {pendingCount} en attente
+                  </span>
+                )}
+              </div>
+            </motion.div>
           )}
 
           {isBobby && !isSidebarCollapsed && (
             <span
-              className="w-1.5 h-1.5 rounded-full bg-gradient-to-br from-[#7C5CFC] to-[#38BDF8] animate-dot-pulse shrink-0 ml-auto"
+              className="w-1.5 h-1.5 rounded-full bg-gradient-to-br from-[#7C5CFC] to-[#38BDF8] animate-dot-pulse shrink-0 ml-auto mt-1 self-start"
             />
+          )}
+
+          {isApprobations && pendingCount > 0 && (
+            <div className={cn("flex items-center justify-center shrink-0 rounded-full", isSidebarCollapsed ? "absolute top-1 right-2 w-4 h-4" : "w-5 h-5 ml-auto")} style={{ backgroundColor: '#FEE2E2' }}>
+               <span className={cn("text-white font-bold bg-[#EF4444] rounded-full flex items-center justify-center", isSidebarCollapsed ? "w-4 h-4 text-[9px]" : "w-5 h-5 text-[10px] animate-dot-pulse")}>
+                 {pendingCount}
+               </span>
+            </div>
           )}
         </div>
       </Link>

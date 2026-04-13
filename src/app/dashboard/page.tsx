@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { dashboardData } from "@/data/dashboard";
+import { approbationsData } from "@/data/approbations";
 import { 
   Euro, Users, BarChart3, AlertCircle, Calendar, 
   Phone, Monitor, Bot, CheckSquare, Flame, 
@@ -144,24 +145,48 @@ export default function Dashboard() {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                {dashboardData.urgentActions.map((action, i) => (
-                  <motion.button
-                    key={i}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.4 + i * 0.1 }}
-                    onClick={() => toast.info(action.label)}
-                    className={cn(
-                      "flex items-center gap-2 px-5 py-2.5 rounded-2xl text-[12px] font-black transition-all hover:scale-105 active:scale-95 shadow-xl border border-white/40",
-                      action.color
-                    )}
-                  >
-                    {action.icon === 'alert' && <AlertCircle className="w-4 h-4" />}
-                    {action.icon === 'calendar' && <Calendar className="w-4 h-4" />}
-                    {action.icon === 'clock' && <Clock className="w-4 h-4" />}
-                    {action.label}
-                  </motion.button>
-                ))}
+                {(() => {
+                  const criticalApprobations = approbationsData.filter(a => {
+                    if (a.status !== 'pending') return false;
+                    if (a.impactLevel !== 'Critique' && a.impactLevel !== 'Élevé') return false;
+                    if (!a.urgencyDeadline) return false;
+                    const timeDiff = new Date(a.urgencyDeadline).getTime() - new Date().getTime();
+                    return timeDiff > 0 && timeDiff <= 2 * 60 * 60 * 1000;
+                  }).map(a => ({
+                    label: `Approbation requise`,
+                    color: "bg-rose-500/10 text-rose-600 border-rose-500/20",
+                    icon: "alert",
+                    href: "/approbations"
+                  }));
+
+                  const combinedActions = [...criticalApprobations, ...dashboardData.urgentActions];
+
+                  return combinedActions.map((action, i) => {
+                    const Element = (action as any).href ? Link : motion.button;
+                    const props = (action as any).href ? { href: (action as any).href } : {
+                      onClick: () => toast.info(action.label),
+                      initial: { opacity: 0, scale: 0.9 },
+                      animate: { opacity: 1, scale: 1 },
+                      transition: { delay: 0.4 + i * 0.1 }
+                    };
+
+                    return (
+                      <Element
+                        key={i}
+                        {...props as any}
+                        className={cn(
+                          "flex items-center gap-2 px-5 py-2.5 rounded-2xl text-[12px] font-black transition-all hover:scale-105 active:scale-95 shadow-xl border border-white/40",
+                          action.color
+                        )}
+                      >
+                        {action.icon === 'alert' && <AlertCircle className="w-4 h-4" />}
+                        {action.icon === 'calendar' && <Calendar className="w-4 h-4" />}
+                        {action.icon === 'clock' && <Clock className="w-4 h-4" />}
+                        {action.label}
+                      </Element>
+                    );
+                  });
+                })()}
               </div>
             </div>
           </motion.div>

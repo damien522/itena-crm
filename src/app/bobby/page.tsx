@@ -8,6 +8,7 @@ import {
   Activity, LayoutGrid, Terminal, ChevronRight, MousePointer2 
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { toast } from "sonner";
 
 function AgentToggle({ isOn, onToggle }: { isOn: boolean, onToggle: () => void }) {
@@ -238,8 +239,25 @@ export default function BobbyIA() {
                         {log.description}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2 text-emerald-500 font-black text-[10px] uppercase bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100">
-                      <Check className="w-3.5 h-3.5" /> Succès
+                    <div className="flex items-center gap-3">
+                      {log.approvalStatus === 'pending' ? (
+                        <>
+                          <div className="flex items-center gap-2 text-amber-500 font-black text-[10px] uppercase bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-100">
+                            ⏳ En attente d'approbation
+                          </div>
+                          <Link href="/approbations" className="text-[10px] font-black text-[#7C5CFC] hover:underline uppercase tracking-widest hidden group-hover:block transition-all whitespace-nowrap">
+                            Voir la demande
+                          </Link>
+                        </>
+                      ) : log.approvalStatus === 'refused' ? (
+                        <div className="flex items-center gap-2 text-rose-500 font-black text-[10px] uppercase bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-100">
+                          <X className="w-3.5 h-3.5" /> Refusé
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 text-emerald-500 font-black text-[10px] uppercase bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100">
+                          <Check className="w-3.5 h-3.5" /> Succès
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 ))}

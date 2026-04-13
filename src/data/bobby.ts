@@ -97,6 +97,8 @@ export interface BobbyLog {
     name: string;
   };
   timestamp: string;
+  approvalRequestId?: string;
+  approvalStatus?: 'pending' | 'accepted' | 'refused' | 'modified';
 }
 
 // Générer 50 logs réalistes
@@ -130,6 +132,8 @@ export const bobbyLogs: BobbyLog[] = Array.from({ length: 50 }).map((_, index) =
     agentName: agent.name,
     description: target ? `${actions[agentIndex]} pour ${target.name}` : actions[agentIndex],
     targetDistributor: target,
+    approvalRequestId: index === 0 ? "APP-001" : index === 1 ? "APP-006" : index === 2 ? "APP-008" : undefined,
+    approvalStatus: index === 0 ? "pending" : index === 1 ? "accepted" : index === 2 ? "refused" : undefined,
     timestamp: dateObj.toISOString()
   };
 });
